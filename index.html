@@ -1,511 +1,337 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<title>MFashion | Modern Style & Product Picks</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MFashion — Fashion Affiliate</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:wght@300;400;500&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
+  :root {
+    --cream: #f5f0e8; --charcoal: #1a1a1a; --gold: #c9a84c;
+    --blush: #e8d5c4; --olive: #4a4a3a; --white: #ffffff;
+    --shadow: 0 8px 40px rgba(0,0,0,0.12);
+    --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Montserrat', sans-serif; background: var(--cream); color: var(--charcoal); overflow-x: hidden; }
 
-body{
-font-family: Arial;
-margin:0;
-background:#f4f4f4;
-}
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 60px; background: rgba(245,240,232,0.92);
+    backdrop-filter: blur(12px); border-bottom: 1px solid rgba(201,168,76,0.25);
+  }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; letter-spacing: 3px; color: var(--charcoal); text-decoration: none; }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--olive); text-decoration: none; transition: var(--transition); }
+  .nav-links a:hover { color: var(--gold); }
 
-header{
-background:black;
-color:white;
-text-align:center;
-padding:30px;
-}
+  .hero {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; text-align: center; padding: 120px 40px 80px;
+    background: linear-gradient(160deg, var(--cream) 60%, var(--blush) 100%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; top: -100px; right: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%); border-radius: 50%; }
+  .hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(52px, 9vw, 110px); font-weight: 900; line-height: 0.9; color: var(--charcoal); margin-bottom: 28px; opacity: 0; animation: fadeUp 0.8s 0.4s forwards; }
+  .hero-title em { color: var(--gold); font-style: italic; }
+  .hero-sub { font-family: 'Cormorant Garamond', serif; font-size: clamp(18px, 3vw, 26px); font-weight: 300; color: var(--olive); max-width: 560px; opacity: 0; animation: fadeUp 0.8s 0.6s forwards; margin-bottom: 48px; }
+  .hero-cta { display: inline-block; padding: 16px 48px; background: var(--charcoal); color: var(--cream); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; text-decoration: none; transition: var(--transition); opacity: 0; animation: fadeUp 0.8s 0.8s forwards; }
+  .hero-cta:hover { background: var(--gold); color: var(--charcoal); }
 
-.container{
-max-width:1100px;
-margin:auto;
-padding:30px;
-}
+  section { padding: 100px 60px; }
+  .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 52px; flex-wrap: wrap; gap: 20px; }
+  .section-label { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(34px, 5vw, 60px); font-weight: 700; line-height: 1; color: var(--charcoal); }
+  .section-title em { font-style: italic; color: var(--gold); }
 
-.products{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:25px;
-}
+  .slider-wrapper { position: relative; }
+  /* overflow:hidden clips the cards — this is the only clipping boundary */
+  .slider-track-container { overflow: hidden; border-radius: 2px; width: 100%; }
+  .slider-track { display: flex; gap: 24px; transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform; }
 
-.card{
-background:white;
-padding:15px;
-border-radius:10px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
-text-align:center;
-}
+  /* Card: NO width in CSS at all — 100% set by JS inline style */
+  .product-card { flex-shrink: 0; background: var(--white); overflow: hidden; cursor: pointer; transition: box-shadow 0.4s ease, transform 0.4s ease; position: relative; }
+  .product-card:hover { box-shadow: var(--shadow); transform: translateY(-6px); }
+  .product-card:hover .card-overlay { opacity: 1; }
+  .card-image-wrap { position: relative; overflow: hidden; aspect-ratio: 3/4; }
+  .card-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; display: block; }
+  .product-card:hover .card-image-wrap img { transform: scale(1.06); }
+  .card-overlay { position: absolute; inset: 0; background: rgba(26,26,26,0.45); display: flex; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
+  .card-overlay-btn { padding: 13px 36px; background: var(--cream); color: var(--charcoal); font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; border: none; cursor: pointer; transition: var(--transition); text-decoration: none; }
+  .card-overlay-btn:hover { background: var(--gold); color: var(--white); }
+  .card-badge { position: absolute; top: 16px; left: 16px; background: var(--gold); color: var(--white); font-size: 9px; font-weight: 700; letter-spacing: 2px; padding: 5px 12px; text-transform: uppercase; }
+  .card-info { padding: 20px 22px 24px; border-top: 1px solid rgba(201,168,76,0.2); }
+  .card-brand { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+  .card-name { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; color: var(--charcoal); margin-bottom: 10px; line-height: 1.3; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .card-price { font-size: 15px; font-weight: 700; color: var(--charcoal); }
+  .card-old-price { font-size: 12px; color: #999; text-decoration: line-through; margin-left: 8px; }
+  .card-stars { color: var(--gold); font-size: 11px; letter-spacing: 1px; }
 
-.card img{
-width:100%;
-border-radius:8px;
-}
+  .slider-controls { display: flex; align-items: center; gap: 14px; }
+  .slider-btn { width: 50px; height: 50px; border: 2px solid var(--charcoal); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); flex-shrink: 0; }
+  .slider-btn:hover { background: var(--charcoal); }
+  .slider-btn:hover svg path { stroke: var(--cream); }
+  .slider-btn svg { width: 18px; height: 18px; }
+  .slider-btn svg path { stroke: var(--charcoal); stroke-width: 2; fill: none; transition: var(--transition); }
+  .slider-dots { display: flex; gap: 8px; align-items: center; }
+  .dot { width: 6px; height: 6px; background: rgba(26,26,26,0.2); border-radius: 50%; cursor: pointer; transition: var(--transition); }
+  .dot.active { background: var(--gold); width: 22px; border-radius: 3px; }
 
-.card h3{
-margin-top:10px;
-}
+  .section-topwear { background: var(--charcoal); }
+  .section-topwear .section-label { color: var(--gold); }
+  .section-topwear .section-title { color: var(--cream); }
+  .section-topwear .product-card { background: #2a2a2a; }
+  .section-topwear .card-info { border-color: rgba(201,168,76,0.3); }
+  .section-topwear .card-name { color: var(--cream); }
+  .section-topwear .card-price { color: var(--cream); }
+  .section-topwear .slider-btn { border-color: rgba(245,240,232,0.5); }
+  .section-topwear .slider-btn:hover { background: var(--gold); border-color: var(--gold); }
+  .section-topwear .slider-btn svg path { stroke: var(--cream); }
+  .section-topwear .slider-btn:hover svg path { stroke: var(--charcoal); }
+  .section-topwear .dot { background: rgba(245,240,232,0.25); }
+  .section-topwear .dot.active { background: var(--gold); }
+  .section-topwear .card-overlay-btn { background: var(--gold); color: var(--charcoal); }
 
-button{
-background:black;
-color:white;
-border:none;
-padding:12px 20px;
-border-radius:5px;
-cursor:pointer;
-}
+  footer { background: var(--charcoal); color: var(--blush); text-align: center; padding: 40px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+  footer span { color: var(--gold); }
 
-button:hover{
-background:#333;
-}
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-.about{
-background:white;
-padding:25px;
-margin-top:30px;
-border-radius:10px;
-}
-
-footer{
-text-align:center;
-font-size:12px;
-color:gray;
-padding:20px;
-}
-
-
-.section{
-margin:40px 0;
-}
-
-.slider{
-display:flex;
-overflow-x:auto;
-scroll-behavior:smooth;
-gap:20px;
-}
-
-.card{
-min-width:250px;
-background:white;
-padding:15px;
-border-radius:10px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
-text-align:center;
-}
-
-.card img{
-width:100%;
-border-radius:8px;
-}
-
-.slider-container{
-position:relative;
-}
-
-.slider-btn{
-position:absolute;
-top:40%;
-background:black;
-color:white;
-border:none;
-padding:10px;
-cursor:pointer;
-border-radius:5px;
-}
-
-.left{
-left:-10px;
-}
-
-.right{
-right:-10px;
-}
-
-
+  @media (max-width: 900px) { nav { padding: 16px 28px; } .nav-links { display: none; } section { padding: 70px 24px; } }
+  @media (max-width: 560px) { .section-header { flex-direction: column; align-items: flex-start; } }
 </style>
-
 </head>
-
 <body>
 
-<header>
-<h1>MFashion</h1>
-<p>Modern Style • Outfit Inspiration • Curated Picks</p>
-</header>
+<nav>
+  <a class="nav-logo" href="#">M<span>FASHION</span></a>
+  <ul class="nav-links">
+    <li><a href="#recent">New Arrivals</a></li>
+    <li><a href="#topwear">Topwear</a></li>
+    <li><a href="#bottomwear">Bottomwear</a></li>
+    <li><a href="#" style="color:var(--gold)">Shop All</a></li>
+  </ul>
+</nav>
 
-<div class="container">
-
-<div class="section">
-
-<h2>Recent products</h2>
-
-<div class="slider-container">
-
-<button class="slider-btn left" onclick="scrollSlider('trendy',-300)">◀</button>
-
-<div class="slider" id="Recent products">
-
-<div class="card">
-<img src="https://image.hm.com/assets/hm/2b/fd/2bfd45271e8f51681e090d0542b65a795815035c.jpg?imwidth=2160">
-<h3>Textured jersey dress</h3>
-<p>Spring outfit.<p>
-<a href="https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1331460002.html">
-<button>View on H&M</button>
-</a>
+<div class="hero">
+  <p class="hero-eyebrow">Curated Fashion Picks · 2026</p>
+  <h1 class="hero-title">Dress<br>with <em>Intent</em></h1>
+  <p class="hero-sub">Handpicked affiliate selections from the world's finest fashion labels — thoughtfully curated for your wardrobe.</p>
+  <a href="#recent" class="hero-cta">Explore Collection</a>
 </div>
 
-
-<div class="card">
-<img src="https://m.media-amazon.com/images/I/61KJOXYZm9L._SY741_.jpg">
-<h3>Women High Rise High Waist Trousers Flared Korean Style Formal Pants| Elegant Workwear for Office, College & Events</h3>
-<p>Effortless trousers for work.<p>
-<a href="https://amzn.to/4s2yqSW">
-<button>View on Amazon</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20241011/7MlW/67090d3d260f9c41e86dafcf/-473Wx593H-469680968-black-MODEL5.jpg">
-<h3>U.S. POLO ASSN. Women Regular Fit Single-Breasted Blazer</h3>
-<p>Winter Outfit Ideas for Casual Weekend Looks You’ll Wear on Repeat.<p>
-<a href="https://ajiio.in/nx5on2Z">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root1/20260209/oxU8/6989eb827ef0c7385cc6d956/-473Wx593H-702882771-blue-MODEL8.jpg">
-<h3>H&M quare-Neck Smocked Blouse</h3>
-<p>Effortless spring outfit.<p>
-<a href="https://ajiio.in/IaqDPLC">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20240927/7pmt/66f6aa21260f9c41e8346bf3/-473Wx593H-700380408-blue-MODEL.jpg">
-<h3>Women 90s Boyfriend Fit Low-Rise Denim Shorts</h3>
-<p>Baseball game outfit ideas teen girl baseball gf summer nights American.</p>
-<a href="https://ajiio.in/98NmTAr">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://image.hm.com/assets/hm/6d/19/6d19967e937f660d9b28ead3f59ad8c1be54c5b8.jpg?imwidth=2160">
-<h3>Flounce-Trimmed Satin Blouse</h3>
-<p>spring outfit idea, Upgrade your wardrobe with the most stylish summer outfits for 202! From flowy sundresses and casual beachwear to trendy co-ord sets, these must-have looks will keep you cool and fashionable. Shop the best lightweight fabrics, breathable linens, and vacation-ready outfits perfect for sunny days.</p>
-<a href="https://ajiio.in/WLMcvuv">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets.sheinindia.in/medias/shein_sys_master/root1/20260213/dyUA/698e70aacbfa0d5608f5e2bb/-473Wx593H-443339260-coffeebrown-MODEL5.jpg">
-<h3>Shein Full Length Semi-Elasticated Waist Pleated Pant</h3>
-<p>Searching for the perfect career fair outfit? I got you. This outfit ideas will help you look confident and polished. This outfit is perfect for networking events, interviews, and career fairs. This pin will help you with your professional fashion, workwear outfits, and office style that makes a great first impression.</p>
-<a href="https://ajiio.in/05ei8l4">
-<button>View on Shein</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://i.pinimg.com/736x/28/17/4b/28174ba72dfdb8206f61141c335b6f9f.jpg">
-<h3>Veronica Mars spring outfit.</h3>
-<p>Veronica Mars best spring outfit ever in Brown colour.</p>
-<a href="https://ajiio.in/Hjj4Yl4">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20250602/JwIW/683d9baa7a6cd4182f78f6df/-473Wx593H-442709174-blue-MODEL.jpg">
-<h3>soft boy aesthetic & how to be a proper aesthetic men!!</h3>
-<p>wanna improve your style this spring, follow me to improve your taste in fashion.</p>
-<a href="https://ajiio.in/o8yHUeX">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20250410/DuQZ/67f6cc377a6cd4182fb9dccd/-473Wx593H-701421172-indigo-MODEL.jpg">
-<h3>summer coolest shorts part-1.</h3>
-<p>In the upcoming summer, we need a chill outfit that is good for summer, and people should know.... "Yeah, He knows about fashion".</p>
-<a href="https://ajiio.in/xvU02kJ">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root1/20250918/HrbB/68cbe81d8bfb9009ac14ad25/-473Wx593H-702274929-blue-MODEL.jpg">
-<h3>Winter Jacket.</h3>
-<p>Warm and stylish jacket for modern outfits.</p>
-<a href="AFFILIATE_LINK_4">
-<button>View on Amazon</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root1/20250918/k0gq/68cbe81d8bfb9009ac14acad/-473Wx593H-702274929-blue-MODEL3.jpg">
-<h3>Aesthetic stripe Jeans.</h3>
-<p>Want the best jeans!!
-I got you.
-Wanna be aesthetic baddie!!
-I got you.</p>
-<a href="https://ajiio.in/7XgtoMc">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20250407/u2bx/67f2d81d7a6cd4182fadd357/-473Wx593H-701421172-blue-MODEL.jpg">
-<h3>summer coolest shorts part-2.</h3>
-<p>In the upcoming summer, we need a chill outfit that is good for summer, and people should know.... "Yeah, He knows about fashion".</p>
-<a href="https://ajiio.in/ht6rjI9">
-<button>View on Ajio</button>
-</a>
-</div>
- 
-</div>
-
-<button class="slider-btn right" onclick="scrollSlider('trendy',300)">▶</button>
-
-</div>
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="products">
-
-<div class="section">
-
-<h2>Topwear</h2>
-
-<div class="slider-container">
-
-<button class="slider-btn left" onclick="scrollSlider('topwear',-300)">◀</button>
-
-<div class="slider" id="topwear">
-
-<div class="card">
-<img src="https://image.hm.com/assets/hm/2b/fd/2bfd45271e8f51681e090d0542b65a795815035c.jpg?imwidth=2160">
-<h3>Textured jersey dress</h3>
-<p>Spring outfit.<p>
-<a href="https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1331460002.html">
-<button>View on H&M</button>
-</a>
-</div>
-
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20241011/7MlW/67090d3d260f9c41e86dafcf/-473Wx593H-469680968-black-MODEL5.jpg">
-<h3>U.S. POLO ASSN. Women Regular Fit Single-Breasted Blazer</h3>
-<p>Winter Outfit Ideas for Casual Weekend Looks You’ll Wear on Repeat.<p>
-<a href="https://ajiio.in/nx5on2Z">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root1/20260209/oxU8/6989eb827ef0c7385cc6d956/-473Wx593H-702882771-blue-MODEL8.jpg">
-<h3>H&M quare-Neck Smocked Blouse</h3>
-<p>Effortless spring outfit.<p>
-<a href="https://ajiio.in/IaqDPLC">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://image.hm.com/assets/hm/6d/19/6d19967e937f660d9b28ead3f59ad8c1be54c5b8.jpg?imwidth=2160">
-<h3>Flounce-Trimmed Satin Blouse</h3>
-<p>spring outfit idea, Upgrade your wardrobe with the most stylish summer outfits for 202! From flowy sundresses and casual beachwear to trendy co-ord sets, these must-have looks will keep you cool and fashionable. Shop the best lightweight fabrics, breathable linens, and vacation-ready outfits perfect for sunny days.</p>
-<a href="https://ajiio.in/WLMcvuv">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20250602/JwIW/683d9baa7a6cd4182f78f6df/-473Wx593H-442709174-blue-MODEL.jpg">
-<h3>soft boy aesthetic & how to be a proper aesthetic men!!</h3>
-<p>wanna improve your style this spring, follow me to improve your taste in fashion.</p>
-<a href="https://ajiio.in/o8yHUeX">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root1/20250828/3gaG/68b058e08bfb9009acb7b494/-473Wx593H-443091684-charcoal-MODEL.jpg">
-<h3>Winter Jacket</h3>
-<p>Stylish jacket for cold weather outfits.</p>
-<a href="#">
-<button>View Product</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root1/20260105/MU0S/695b9f6dcbfa0d56084bb9b6/-473Wx593H-702712762-black-MODEL.jpg">
-<h3>Classic T-Shirt</h3>
-<p>Minimal cotton t-shirt for everyday wear.</p>
-<a href="#">
-<button>View Product</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root1/20260105/MU0S/695b9f6dcbfa0d56084bb9b6/-473Wx593H-702712762-black-MODEL.jpg">
-<h3>Classic T-Shirt</h3>
-<p>Minimal cotton t-shirt for everyday wear.</p>
-<a href="#">
-<button>View Product</button>
-</a>
-</div>
-
-</div>
-
-<button class="slider-btn right" onclick="scrollSlider('topwear',300)">▶</button>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-
-
-
-
-
-<div class="products">
-
-<div class="section">
-
-<h2>Bottomwear</h2>
-
-<div class="slider-container">
-
-<button class="slider-btn left" onclick="scrollSlider('bottomwear',-300)">◀</button>
-
-<div class="slider" id="bottomwear">
-
-<div class="card">
-<img src="https://m.media-amazon.com/images/I/61KJOXYZm9L._SY741_.jpg">
-<h3>Women High Rise High Waist Trousers Flared Korean Style Formal Pants| Elegant Workwear for Office, College & Events</h3>
-<p>Effortless trousers for work.<p>
-<a href="https://amzn.to/4s2yqSW">
-<button>View on Amazon</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20240927/7pmt/66f6aa21260f9c41e8346bf3/-473Wx593H-700380408-blue-MODEL.jpg">
-<h3>Women 90s Boyfriend Fit Low-Rise Denim Shorts</h3>
-<p>Baseball game outfit ideas teen girl baseball gf summer nights American.</p>
-<a href="https://ajiio.in/98NmTAr">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets.sheinindia.in/medias/shein_sys_master/root1/20260213/dyUA/698e70aacbfa0d5608f5e2bb/-473Wx593H-443339260-coffeebrown-MODEL5.jpg">
-<h3>Shein Full Length Semi-Elasticated Waist Pleated Pant</h3>
-<p>Searching for the perfect career fair outfit? I got you. This outfit ideas will help you look confident and polished. This outfit is perfect for networking events, interviews, and career fairs. This pin will help you with your professional fashion, workwear outfits, and office style that makes a great first impression.</p>
-<a href="https://ajiio.in/05ei8l4">
-<button>View on Shein</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://i.pinimg.com/736x/28/17/4b/28174ba72dfdb8206f61141c335b6f9f.jpg">
-<h3>Veronica Mars spring outfit.</h3>
-<p>Veronica Mars best spring outfit ever in Brown colour.</p>
-<a href="https://ajiio.in/Hjj4Yl4">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20250407/u2bx/67f2d81d7a6cd4182fadd357/-473Wx593H-701421172-blue-MODEL.jpg">
-<h3>summer coolest shorts part-2.</h3>
-<p>In the upcoming summer, we need a chill outfit that is good for summer, and people should know.... "Yeah, He knows about fashion".</p>
-<a href="https://ajiio.in/ht6rjI9">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root1/20250918/k0gq/68cbe81d8bfb9009ac14acad/-473Wx593H-702274929-blue-MODEL3.jpg">
-<h3>Aesthetic stripe Jeans.</h3>
-<p>Want the best jeans!!
-I got you.
-Wanna be aesthetic baddie!!
-I got you.</p>
-<a href="https://ajiio.in/7XgtoMc">
-<button>View on Ajio</button>
-</a>
-</div>
-
-<div class="card">
-<img src="https://assets-jiocdn.ajio.com/medias/sys_master/root/20250410/DuQZ/67f6cc377a6cd4182fb9dccd/-473Wx593H-701421172-indigo-MODEL.jpg">
-<h3>summer coolest shorts part-1.</h3>
-<p>In the upcoming summer, we need a chill outfit that is good for summer, and people should know.... "Yeah, He knows about fashion".</p>
-<a href="https://ajiio.in/xvU02kJ">
-<button>View on Ajio</button>
-</a>
-</div>
-
-</div>
-
-<button class="slider-btn right" onclick="scrollSlider('bottomwear',300)">▶</button>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="about">
-
-<h2>About MFashion</h2>
-
-<p>
-MFashion is a curated fashion inspiration and product discovery platform.
-We share modern outfit ideas, minimal style inspiration, and carefully selected fashion products.
-Many visitors discover our content through Pinterest and explore stylish products through our recommendations.
-</p>
-
-</div>
-
-</div>
-
-<footer>
-
-<p>By Harsssh from Pinterest, Hii.</p>
-
-</footer>
+<section id="recent">
+  <div class="section-header">
+    <div><p class="section-label">Just Dropped</p><h2 class="section-title">Recent <em>Products</em></h2></div>
+    <div class="slider-controls">
+      <div class="slider-dots" id="recent-dots"></div>
+      <button class="slider-btn" onclick="slide('recent',-1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="slider-btn" onclick="slide('recent',1)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+  </div>
+  <div class="slider-wrapper"><div class="slider-track-container" id="recent-container"><div class="slider-track" id="recent-track"></div></div></div>
+</section>
+
+<section id="topwear" class="section-topwear">
+  <div class="section-header">
+    <div><p class="section-label">Upper Essentials</p><h2 class="section-title">Top<em>wear</em></h2></div>
+    <div class="slider-controls">
+      <div class="slider-dots" id="topwear-dots"></div>
+      <button class="slider-btn" onclick="slide('topwear',-1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="slider-btn" onclick="slide('topwear',1)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+  </div>
+  <div class="slider-wrapper"><div class="slider-track-container" id="topwear-container"><div class="slider-track" id="topwear-track"></div></div></div>
+</section>
+
+<section id="bottomwear">
+  <div class="section-header">
+    <div><p class="section-label">Lower Essentials</p><h2 class="section-title">Bottom<em>wear</em></h2></div>
+    <div class="slider-controls">
+      <div class="slider-dots" id="bottomwear-dots"></div>
+      <button class="slider-btn" onclick="slide('bottomwear',-1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="slider-btn" onclick="slide('bottomwear',1)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+  </div>
+  <div class="slider-wrapper"><div class="slider-track-container" id="bottomwear-container"><div class="slider-track" id="bottomwear-track"></div></div></div>
+</section>
+
+<footer><p>© 2026 <span>MFashion</span> · Affiliate Fashion Curation · All Rights Reserved</p></footer>
 
 <script>
+const data = {
+  recent: [
+    { brand:"H&M", name:"Textured jersey dress", price:"₹1,499", badge:"New", stars:"★★★★★", img:"https://image.hm.com/assets/hm/2b/fd/2bfd45271e8f51681e090d0542b65a795815035c.jpg?imwidth=2160", link:"https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1331460002.html" },
 
-function scrollSlider(id, amount){
-document.getElementById(id).scrollBy({
-left: amount,
-behavior: "smooth"
-});
+    { brand:"GRECIILOOKS", name:"Women High Rise High Waist Trousers Flared Korean Style Formal Pants", price:"₹549", badge:"Hot", stars:"★★★★☆", img:"https://m.media-amazon.com/images/I/61KJOXYZm9L._SY741_.jpg", link:"https://amzn.to/4s2yqSW" },
+
+    { brand:"U.S. POLO ASSN.", name:"Single-Breasted Blazer", price:"₹3,834", old:"₹5,899", badge:"New", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20241011/7MlW/67090d3d260f9c41e86dafcf/-473Wx593H-469680968-black-MODEL5.jpg", link:"https://ajiio.in/nx5on2Z" },
+
+    { brand:"H&M", name:"Smocked blouse", price:"₹1,199", badge:"Sale", stars:"★★★★☆", img:"https://image.hm.com/assets/hm/e4/54/e45462ad906bf0944c30726ec8c1be9c3c381fd4.jpg?imwidth=2160", link:"https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1297517001.html" },
+
+    { brand:"H&M", name:"90s Boyfriend Fit Low Denim shorts", price:"₹1,599", badge:"New", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20240927/7pmt/66f6aa21260f9c41e8346bf3/-473Wx593H-700380408-blue-MODEL.jpg", link:"https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1213113005.html" },
+
+    { brand:"H&M", name:"Flounce-trimmed satin blouse", price:"₹1,499", badge:"Trending", stars:"★★★★☆", img:"https://image.hm.com/assets/hm/19/a7/19a7cccd6f353fdfdb19004d09baf35ca59a50fc.jpg?imwidth=2160", link:"https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1315674001.html" },
+
+    { brand:"Shein", name:"Pleated Pant", price:"₹1,499", badge:"Trending", stars:"★★★★☆", img:"https://assets.sheinindia.in/medias/shein_sys_master/root1/20260212/ctrp/698def3acbfa0d5608f2c2fc/-473Wx593H-443339260-coffeebrown-MODEL4.jpg", link:"https://ajiio.in/05ei8l4" },
+
+    { brand:"Shein", name:"Full Length Fly With Button Closure Pants", price:"₹979", old:"₹1,399", badge:"Trending", stars:"★★★★☆", img:"https://assets.sheinindia.in/medias/shein_sys_master/root1/20260212/lCeT/698df2147ef0c7385ce6d918/-473Wx593H-443339189-coffeebrown-MODEL.jpg", link:"https://ajiio.in/Hjj4Yl4" },
+
+    { brand:"Gap", name:"Men Slim Fit Linen Shirt with Spread Collar", price:"₹1,800", badge:"Sale", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20250512/Evdo/6821a4a17a6cd4182f28766f/-473Wx593H-442709174-blue-MODEL4.jpg", link:"https://ajiio.in/o8yHUeX" },
+
+    { brand:"Divawalk", name:"Washed Regular Fit Flat-Front Denim Shorts", price:"₹3,899", badge:"Hot", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20250407/u2bx/67f2d81c7a6cd4182fadd2bc/-1117Wx1400H-701421172-blue-MODEL.jpg", link:"https://ajiio.in/ht6rjI9" },
+
+    { brand:"Divawalk", name:"Men Washed Regular Fit Bermudas Shorts", price:"₹3,899", badge:"Trending", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20250410/NPlT/67f6cc437a6cd4182fb9dda8/-1117Wx1400H-701421172-indigo-MODEL5.jpg", link:"https://ajiio.in/xvU02kJ" },
+
+    { brand:"Snitch", name:"Men Mid-Rise Baggy Jeans", price:"₹1,619", old:"₹1,799", badge:"New", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root1/20250918/HrbB/68cbe81d8bfb9009ac14aca0/-1117Wx1400H-702274929-blue-MODEL.jpg", link:"https://ajiio.in/7XgtoMc" },
+  ],
+
+
+
+
+
+  topwear: [
+    { brand:"H&M", name:"Textured jersey dress", price:"₹1,499", badge:"New", stars:"★★★★★", img:"https://image.hm.com/assets/hm/2b/fd/2bfd45271e8f51681e090d0542b65a795815035c.jpg?imwidth=2160", link:"https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1331460002.html" },
+
+    { brand:"U.S. POLO ASSN.", name:"Single-Breasted Blazer", price:"₹3,834", old:"₹5,899", badge:"New", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20241011/7MlW/67090d3d260f9c41e86dafcf/-473Wx593H-469680968-black-MODEL5.jpg", link:"https://ajiio.in/nx5on2Z" },
+
+    { brand:"H&M", name:"Smocked blouse", price:"₹1,199", badge:"Sale", stars:"★★★★☆", img:"https://image.hm.com/assets/hm/e4/54/e45462ad906bf0944c30726ec8c1be9c3c381fd4.jpg?imwidth=2160", link:"https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1297517001.html" },
+
+    { brand:"H&M", name:"Flounce-trimmed satin blouse", price:"₹1,499", badge:"Trending", stars:"★★★★☆", img:"https://image.hm.com/assets/hm/19/a7/19a7cccd6f353fdfdb19004d09baf35ca59a50fc.jpg?imwidth=2160", link:"https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1315674001.html" },
+
+    { brand:"Gap", name:"Men Slim Fit Linen Shirt with Spread Collar", price:"₹1,800", badge:"Sale", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20250512/Evdo/6821a4a17a6cd4182f28766f/-473Wx593H-442709174-blue-MODEL4.jpg", link:"https://ajiio.in/o8yHUeX" },
+  ],
+
+
+
+
+
+  bottomwear: [
+    { brand:"GRECIILOOKS", name:"Women High Rise High Waist Trousers Flared Korean Style Formal Pants", price:"₹549", badge:"Hot", stars:"★★★★☆", img:"https://m.media-amazon.com/images/I/61KJOXYZm9L._SY741_.jpg", link:"https://amzn.to/4s2yqSW" },
+
+    { brand:"H&M", name:"90s Boyfriend Fit Low Denim shorts", price:"₹1,599", badge:"New", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20240927/7pmt/66f6aa21260f9c41e8346bf3/-473Wx593H-700380408-blue-MODEL.jpg", link:"https://linksredirect.com/?cid=276173&source=linkkit&url=https%3A%2F%2Fwww2.hm.com%2Fen_in%2Fproductpage.1213113005.html" },
+
+    { brand:"Shein", name:"Pleated Pant", price:"₹1,499", badge:"Trending", stars:"★★★★☆", img:"https://assets.sheinindia.in/medias/shein_sys_master/root1/20260212/ctrp/698def3acbfa0d5608f2c2fc/-473Wx593H-443339260-coffeebrown-MODEL4.jpg", link:"https://ajiio.in/05ei8l4" },
+
+    { brand:"Shein", name:"Full Length Fly With Button Closure Pants", price:"₹979", old:"₹1,399", badge:"Trending", stars:"★★★★☆", img:"https://assets.sheinindia.in/medias/shein_sys_master/root1/20260212/lCeT/698df2147ef0c7385ce6d918/-473Wx593H-443339189-coffeebrown-MODEL.jpg", link:"https://ajiio.in/Hjj4Yl4" },
+
+    { brand:"Snitch", name:"Men Mid-Rise Baggy Jeans", price:"₹1,619", old:"₹1,799", badge:"New", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root1/20250918/HrbB/68cbe81d8bfb9009ac14aca0/-1117Wx1400H-702274929-blue-MODEL.jpg", link:"https://ajiio.in/7XgtoMc" },
+
+    { brand:"Divawalk", name:"Washed Regular Fit Flat-Front Denim Shorts", price:"₹3,899", badge:"Hot", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20250407/u2bx/67f2d81c7a6cd4182fadd2bc/-1117Wx1400H-701421172-blue-MODEL.jpg", link:"https://ajiio.in/ht6rjI9" },
+
+    { brand:"Divawalk", name:"Men Washed Regular Fit Bermudas Shorts", price:"₹3,899", badge:"Trending", stars:"★★★★☆", img:"https://assets-jiocdn.ajio.com/medias/sys_master/root/20250410/NPlT/67f6cc437a6cd4182fb9dda8/-1117Wx1400H-701421172-indigo-MODEL5.jpg", link:"https://ajiio.in/xvU02kJ" },
+  ]
+};
+
+const state = { recent: 0, topwear: 0, bottomwear: 0 };
+
+function visibleCount() {
+  if (window.innerWidth <= 560) return 1;
+  if (window.innerWidth <= 900) return 2;
+  return 3;
 }
 
-</script>
+// Single source of truth for card width — always from the visible container element
+function getCardWidth(section) {
+  const gap = 24;
+  const vis = visibleCount();
+  const containerW = document.getElementById(section + '-container').offsetWidth;
+  return (containerW - gap * (vis - 1)) / vis;
+}
 
+function buildCards(section) {
+  const track = document.getElementById(section + '-track');
+  track.innerHTML = data[section].map(p =>
+    '<div class="product-card">' +
+      '<div class="card-image-wrap">' +
+        '<img src="' + p.img + '" alt="' + p.name + '" loading="lazy"/>' +
+        '<div class="card-badge">' + p.badge + '</div>' +
+        '<div class="card-overlay"><a href="' + p.link + '" class="card-overlay-btn">Shop Now</a></div>' +
+      '</div>' +
+      '<div class="card-info">' +
+        '<p class="card-brand">' + p.brand + '</p>' +
+        '<p class="card-name">' + p.name + '</p>' +
+        '<div class="card-footer">' +
+          '<div><span class="card-price">' + p.price + '</span>' + (p.old ? '<span class="card-old-price">' + p.old + '</span>' : '') + '</div>' +
+          '<span class="card-stars">' + p.stars + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+}
+
+function buildDots(section) {
+  const vis = visibleCount();
+  const pages = Math.ceil(data[section].length / vis);
+  document.getElementById(section + '-dots').innerHTML =
+    Array.from({length: pages}, (_, i) =>
+      '<div class="dot ' + (i === 0 ? 'active' : '') + '" onclick="goTo(\'' + section + '\',' + i + ')"></div>'
+    ).join('');
+}
+
+function updateSlider(section) {
+  const track = document.getElementById(section + '-track');
+  if (!track.children.length) return;
+
+  const gap = 24;
+  const vis = visibleCount();
+  const cardWidth = getCardWidth(section);
+
+  // Apply exact pixel width to every card via inline style — CSS has no say
+  Array.from(track.children).forEach(card => {
+    card.style.width = cardWidth + 'px';
+  });
+
+  const offset = state[section] * (cardWidth + gap);
+  track.style.transform = 'translateX(-' + offset + 'px)';
+
+  const currentPage = Math.floor(state[section] / vis);
+  document.querySelectorAll('#' + section + '-dots .dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentPage);
+  });
+}
+
+function slide(section, dir) {
+  const vis = visibleCount();
+  const max = data[section].length - vis;
+  state[section] = (state[section] + dir + data[section].length) % data[section].length;
+  if (state[section] > max) state[section] = 0;
+  updateSlider(section);
+}
+
+function goTo(section, page) {
+  const vis = visibleCount();
+  state[section] = Math.min(page * vis, data[section].length - vis);
+  updateSlider(section);
+}
+
+const SECTIONS = ['recent', 'topwear', 'bottomwear'];
+
+function init() {
+  SECTIONS.forEach(s => { buildCards(s); buildDots(s); updateSlider(s); });
+}
+
+let touchStartX = 0;
+SECTIONS.forEach(s => {
+  const track = document.getElementById(s + '-track');
+  track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive: true});
+  track.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) slide(s, diff > 0 ? 1 : -1);
+  }, {passive: true});
+});
+
+window.addEventListener('resize', () => {
+  SECTIONS.forEach(s => { state[s] = 0; buildDots(s); updateSlider(s); });
+});
+
+// Run after full paint so container offsetWidth is accurate
+window.addEventListener('load', init);
+</script>
 </body>
 </html>
